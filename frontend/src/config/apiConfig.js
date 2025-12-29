@@ -12,7 +12,7 @@ const isProd = typeof import.meta !== 'undefined' && import.meta.env?.PROD
 // In production: use deployed backend URL from environment variable
 // In development: use relative URL (proxied via Vite to localhost:5000)
 export const BASE_URL = isProd
-  ? process.env.VITE_API_URL || 'https://api.apna-tracker.onrender.com'
+  ? import.meta.env.VITE_API_URL || 'https://api.apna-tracker.onrender.com'
   : '';
 
 /**
