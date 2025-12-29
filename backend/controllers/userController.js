@@ -13,14 +13,15 @@ const authUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email });
 
   if (user && (await user.matchPassword(password))) {
-    console.log('[authUser] Password matched, calling generateToken for userId:', user._id);
-    generateToken(res, user._id);
-    console.log('[authUser] generateToken completed, sending user response');
+    console.log('[authUser] Password matched, generating token for userId:', user._id);
+    const token = generateToken(user._id);
+    console.log('[authUser] Token generated, sending response with token');
 
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      token, // Return JWT token for Bearer auth
     });
   } else {
     console.log('[authUser] Login failed - invalid email or password');
@@ -52,14 +53,15 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
-    console.log('[registerUser] User created, calling generateToken for userId:', user._id);
-    generateToken(res, user._id);
-    console.log('[registerUser] generateToken completed, sending user response');
+    console.log('[registerUser] User created, generating token for userId:', user._id);
+    const token = generateToken(user._id);
+    console.log('[registerUser] Token generated, sending response with token');
 
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      token, // Return JWT token for Bearer auth
     });
   } else {
     console.log('[registerUser] Failed to create user');
@@ -68,25 +70,12 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Logout user / clear cookie
+// @desc    Logout user
 // @route   POST /api/users/logout
 // @access  Public
 const logoutUser = (req, res) => {
-  // Clear JWT cookie with same settings as when created
-  // Ensures cookie is cleared across all domains
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-    expires: new Date(0), // Expire immediately
-  };
-  
-  // Set domain for production to match login domain
-  if (process.env.NODE_ENV === 'production') {
-    cookieOptions.domain = '.onrender.com';
-  }
-  
-  res.cookie('jwt', '', cookieOptions);
+  // Logout is handled on frontend by clearing localStorage token
+  // No server-side action needed for stateless Bearer token auth
   res.status(200).json({ message: 'Logged out successfully' });
 };
 

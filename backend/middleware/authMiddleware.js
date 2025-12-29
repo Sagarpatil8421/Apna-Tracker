@@ -5,11 +5,21 @@ import User from '../models/userModel.js';
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
-  token = req.cookies.jwt;
+  // Check for Bearer token in Authorization header
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.slice(7); // Remove 'Bearer ' prefix
+    console.log('[authMiddleware] Token found in Authorization header');
+  }
+  // Fallback to cookie for backward compatibility
+  else if (req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
+    console.log('[authMiddleware] Token found in cookies (fallback)');
+  }
 
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('[authMiddleware] Token verified, userId:', decoded.userId);
 
       const user = await User.findById(decoded.userId).select('-password');
 
