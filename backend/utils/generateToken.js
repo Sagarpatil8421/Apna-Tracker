@@ -15,6 +15,11 @@ const generateToken = (res, userId) => {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   };
 
+  // Set domain for production to allow cookies across subdomains
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.domain = '.onrender.com'; // Allow cookies for *.onrender.com
+  }
+
   // DEBUG: Log cookie generation
   console.log('[generateToken] Setting JWT cookie with options:', {
     NODE_ENV: process.env.NODE_ENV,

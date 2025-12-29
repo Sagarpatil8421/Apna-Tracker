@@ -74,12 +74,19 @@ const registerUser = asyncHandler(async (req, res) => {
 const logoutUser = (req, res) => {
   // Clear JWT cookie with same settings as when created
   // Ensures cookie is cleared across all domains
-  res.cookie('jwt', '', {
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
     expires: new Date(0), // Expire immediately
-  });
+  };
+  
+  // Set domain for production to match login domain
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.domain = '.onrender.com';
+  }
+  
+  res.cookie('jwt', '', cookieOptions);
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
