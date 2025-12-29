@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, ProgressBar, Row, Col } from 'react-bootstrap';
 import Loader from '../components/Loader';
 import { toast } from 'react-toastify';
+import { BASE_URL, mergeFetchOptions } from '../config/apiConfig';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
@@ -14,7 +15,9 @@ const ProgressScreen = () => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/subtopics', { method: 'GET', credentials: 'include' });
+        const res = await fetch(`${BASE_URL}/api/subtopics`,
+          mergeFetchOptions({ method: 'GET' })
+        );
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         setSubtopics(data);
