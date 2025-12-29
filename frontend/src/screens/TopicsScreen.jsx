@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Accordion, Badge, Table, Form, Button, Container } from 'react-bootstrap';
 import Loader from '../components/Loader';
 import { toast } from 'react-toastify';
+import { BASE_URL, mergeFetchOptions } from '../config/apiConfig';
 
 const TopicsScreen = () => {
   const [topics, setTopics] = useState([]);
@@ -16,10 +17,9 @@ const TopicsScreen = () => {
   const fetchTopics = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/topics', {
-        method: 'GET',
-        credentials: 'include',
-      });
+      const res = await fetch(`${BASE_URL}/api/topics`, 
+        mergeFetchOptions({ method: 'GET' })
+      );
 
       if (!res.ok) throw new Error(await res.text());
 
@@ -41,10 +41,9 @@ const TopicsScreen = () => {
   const fetchSubtopics = async (topicId) => {
     setLoadingSubtopics(true);
     try {
-      const res = await fetch(`/api/subtopics/${topicId}`, {
-        method: 'GET',
-        credentials: 'include',
-      });
+      const res = await fetch(`${BASE_URL}/api/subtopics/${topicId}`, 
+        mergeFetchOptions({ method: 'GET' })
+      );
 
       if (!res.ok) throw new Error(await res.text());
 
@@ -99,19 +98,19 @@ const TopicsScreen = () => {
 
     setSubtopicField(topicId, 'creating', true);
     try {
-      const res = await fetch('/api/subtopics', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          topic: topicId,
-          difficulty,
-          leetcodeLink: leetcodeLink || undefined,
-          youtubeLink: youtubeLink || undefined,
-          articleLink: articleLink || undefined,
-        }),
-      });
+      const res = await fetch(`${BASE_URL}/api/subtopics`, 
+        mergeFetchOptions({
+          method: 'POST',
+          body: JSON.stringify({
+            name,
+            topic: topicId,
+            difficulty,
+            leetcodeLink: leetcodeLink || undefined,
+            youtubeLink: youtubeLink || undefined,
+            articleLink: articleLink || undefined,
+          }),
+        })
+      );
 
       if (!res.ok) {
         const txt = await res.text();
@@ -156,12 +155,12 @@ const TopicsScreen = () => {
 
     setCreating(true);
     try {
-      const res = await fetch('/api/topics', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newTopicName.trim() }),
-      });
+      const res = await fetch(`${BASE_URL}/api/topics`, 
+        mergeFetchOptions({
+          method: 'POST',
+          body: JSON.stringify({ name: newTopicName.trim() }),
+        })
+      );
 
       if (!res.ok) {
         const txt = await res.text();
@@ -181,12 +180,12 @@ const TopicsScreen = () => {
   const handleCheckboxChange = async (subtopic, checked) => {
     const newStatus = checked ? 'Done' : 'Pending';
     try {
-      const res = await fetch(`/api/subtopics/${subtopic._id}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const res = await fetch(`${BASE_URL}/api/subtopics/${subtopic._id}`, 
+        mergeFetchOptions({
+          method: 'PUT',
+          body: JSON.stringify({ status: newStatus }),
+        })
+      );
 
       if (!res.ok) {
         const txt = await res.text();
@@ -196,7 +195,9 @@ const TopicsScreen = () => {
       // refresh subtopics and topics (parent topic status may change)
       await fetchSubtopics(subtopic.topic);
       // refresh topics list
-      const tRes = await fetch('/api/topics', { method: 'GET', credentials: 'include' });
+      const tRes = await fetch(`${BASE_URL}/api/topics`, 
+        mergeFetchOptions({ method: 'GET' })
+      );
       if (tRes.ok) {
         const tData = await tRes.json();
         setTopics(tData);
