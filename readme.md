@@ -72,7 +72,7 @@ npm run build
 3. Start the backend server (production):
 
 ```powershell
-NODE_ENV=production PORT=5000 node backend/server.js
+NODE_ENV=production PORT=5000 node server.js
 ```
 
 ## Notes
