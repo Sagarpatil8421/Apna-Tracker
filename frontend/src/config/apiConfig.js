@@ -16,6 +16,19 @@ export const BASE_URL = isProd
   : '';
 
 /**
+ * Get Bearer token from localStorage
+ * @returns {string|null} JWT token or null if not available
+ */
+const getToken = () => {
+  try {
+    return localStorage.getItem('token');
+  } catch (error) {
+    console.error('Error reading token from localStorage:', error);
+    return null;
+  }
+};
+
+/**
  * Default fetch options with credentials for cookie-based auth
  */
 export const DEFAULT_FETCH_OPTIONS = {
@@ -39,15 +52,25 @@ export const getApiUrl = (endpoint) => {
 };
 
 /**
- * Merge fetch options with default credentials
+ * Merge fetch options with default credentials and Authorization header
  * @param {object} options - Custom fetch options
- * @returns {object} Merged options
+ * @returns {object} Merged options with Bearer token if available
  */
-export const mergeFetchOptions = (options = {}) => ({
-  ...DEFAULT_FETCH_OPTIONS,
-  ...options,
-  headers: {
+export const mergeFetchOptions = (options = {}) => {
+  const token = getToken();
+  const headers = {
     ...DEFAULT_FETCH_OPTIONS.headers,
     ...options.headers,
-  },
-});
+  };
+
+  // Add Authorization header if token is available
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return {
+    ...DEFAULT_FETCH_OPTIONS,
+    ...options,
+    headers,
+  };
+};
