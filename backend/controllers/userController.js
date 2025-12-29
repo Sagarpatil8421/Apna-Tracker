@@ -8,10 +8,14 @@ import generateToken from '../utils/generateToken.js';
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  console.log('[authUser] Login attempt for email:', email);
+
   const user = await User.findOne({ email });
 
   if (user && (await user.matchPassword(password))) {
+    console.log('[authUser] Password matched, calling generateToken for userId:', user._id);
     generateToken(res, user._id);
+    console.log('[authUser] generateToken completed, sending user response');
 
     res.json({
       _id: user._id,
@@ -19,6 +23,7 @@ const authUser = asyncHandler(async (req, res) => {
       email: user.email,
     });
   } else {
+    console.log('[authUser] Login failed - invalid email or password');
     res.status(401);
     throw new Error('Invalid email or password');
   }
@@ -30,9 +35,12 @@ const authUser = asyncHandler(async (req, res) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
+  console.log('[registerUser] Registration attempt for email:', email);
+
   const userExists = await User.findOne({ email });
 
   if (userExists) {
+    console.log('[registerUser] User already exists');
     res.status(400);
     throw new Error('User already exists');
   }
@@ -44,7 +52,9 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
+    console.log('[registerUser] User created, calling generateToken for userId:', user._id);
     generateToken(res, user._id);
+    console.log('[registerUser] generateToken completed, sending user response');
 
     res.status(201).json({
       _id: user._id,
@@ -52,6 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
     });
   } else {
+    console.log('[registerUser] Failed to create user');
     res.status(400);
     throw new Error('Invalid user data');
   }

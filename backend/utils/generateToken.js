@@ -15,6 +15,16 @@ const generateToken = (res, userId) => {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   };
 
+  // DEBUG: Log cookie generation
+  console.log('[generateToken] Setting JWT cookie with options:', {
+    NODE_ENV: process.env.NODE_ENV,
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
+    httpOnly: cookieOptions.httpOnly,
+    maxAge: cookieOptions.maxAge,
+    tokenLength: token.length,
+  });
+
   res.cookie('jwt', token, cookieOptions);
 };
 

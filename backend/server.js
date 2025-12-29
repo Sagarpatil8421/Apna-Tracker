@@ -31,8 +31,10 @@ const corsOptions = {
     
     // Allow requests with no origin (mobile apps, curl requests, same-origin requests)
     if (!origin || allowedOrigins.includes(origin)) {
+      console.log('[CORS] Allowing origin:', origin || '(no origin - same-site/mobile)');
       callback(null, true);
     } else {
+      console.log('[CORS] Blocking origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -45,6 +47,8 @@ const corsOptions = {
   // Allow credentials in requests
   optionsSuccessStatus: 200,
 };
+
+console.log('[Server] CORS middleware configured with credentials: true');
 
 app.use(cors(corsOptions));
 
@@ -74,4 +78,8 @@ if (process.env.NODE_ENV === 'production') {
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port, () => console.log(`Server started on port ${port}`));
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+  console.log('[Server] Environment:', process.env.NODE_ENV || 'development');
+  console.log('[Server] Cookie settings: secure=' + (process.env.NODE_ENV === 'production') + ', sameSite=' + (process.env.NODE_ENV === 'production' ? 'None' : 'Lax'));
+});
