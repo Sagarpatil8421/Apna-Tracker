@@ -5,12 +5,17 @@ const generateToken = (res, userId) => {
     expiresIn: '30d',
   });
 
-  res.cookie('jwt', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
-    sameSite: 'strict', // Prevent CSRF attacks
+  // Cookie options for secure cross-domain authentication
+  const cookieOptions = {
+    httpOnly: true, // Prevent JavaScript access; blocks XSS attacks
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    // sameSite: 'None' required for cross-domain requests + secure cookies
+    // sameSite: 'Lax' is safer for local development
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-  });
+  };
+
+  res.cookie('jwt', token, cookieOptions);
 };
 
 export default generateToken;

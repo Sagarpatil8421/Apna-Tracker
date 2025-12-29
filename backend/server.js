@@ -16,12 +16,37 @@ connectDB();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: true, // allow frontend domain automatically
-    credentials: true, // allow cookies
-  })
-);
+// CORS configuration for cross-domain cookie authentication
+// In production: allow specific frontend domains
+// In development: allow localhost on any port
+const corsOptions = {
+  // Allow requests from frontend domains
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'https://apna-tracker.vercel.app',
+      'https://apna-tracker.onrender.com',
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ];
+    
+    // Allow requests with no origin (mobile apps, curl requests, same-origin requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  // Allow cookies to be sent and received with requests
+  credentials: true,
+  // Allow specified HTTP methods
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  // Allow specified headers
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  // Allow credentials in requests
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 
 app.use(express.json());
